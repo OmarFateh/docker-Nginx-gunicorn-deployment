@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import logging.config
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -21,13 +22,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY")
-print(SECRET_KEY)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = int(os.environ.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
-
+# ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -133,3 +133,52 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, 'mediafiles')
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt' : "%Y-%b-%d %H:%M:%S"
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'ErrorFileHandler': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': (os.path.join(BASE_DIR, 'errors.log')),
+            'formatter':'verbose'
+        },
+        'DebugFileHandler': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': (os.path.join(BASE_DIR, 'debug.log')),
+            'formatter':'verbose'
+        },
+        'mail_admins': {
+
+        'level': 'ERROR',
+
+        'class': 'django.utils.log.AdminEmailHandler'
+
+         },
+    },
+    'loggers': {
+        'django': {
+            'handlers':['ErrorFileHandler','mail_admins'],
+            'propagate': True,
+            'level':'ERROR',
+        },
+        'DailyData': {
+            'handlers': ['DebugFileHandler'],
+            'level': 'DEBUG',
+        },
+    }
+}
+
+logging.config.dictConfig(LOGGING)
